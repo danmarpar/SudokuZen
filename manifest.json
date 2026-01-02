@@ -1,8 +1,8 @@
 {
   "name": "Sudoku Zen",
   "short_name": "Sudoku",
-  "start_url": "/YOUR-REPO-NAME/index.html",
-  "scope": "/YOUR-REPO-NAME/",
+  "start_url": "/SudokuZen/index.html",
+  "scope": "/SudokuZen/",
   "display": "standalone",
   "background_color": "#f8f9fa",
   "theme_color": "#f8f9fa",

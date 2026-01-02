@@ -1,6 +1,6 @@
 const CACHE_NAME = 'sudoku-v1';
 // IMPORTANT: Add your repository name here too if not using a custom domain
-const REPO_NAME = '/YOUR-REPO-NAME'; 
+const REPO_NAME = '/SudokuZen'; 
 
 const ASSETS = [
   REPO_NAME + '/',
