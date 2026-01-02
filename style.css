@@ -1,0 +1,129 @@
+:root {
+    --bg-color: #f8f9fa;
+    --grid-line: #dee2e6;
+    --grid-line-thick: #343a40;
+    --primary-color: #0056b3;
+    --highlight-color: #e7f1ff;
+    --error-color: #ff6b6b;
+    --text-main: #212529;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    font-family: var(--font-family);
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h1 { font-size: 1.5rem; color: var(--text-main); margin: 0; }
+
+/* --- THE GRID --- */
+.sudoku-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Keeps it perfectly square */
+    background: var(--grid-line-thick);
+    gap: 1px;
+    border: 2px solid var(--grid-line-thick);
+}
+
+.cell {
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Thicker borders for 3x3 blocks */
+.cell:nth-child(3n) { border-right: 2px solid var(--grid-line-thick); }
+.cell:nth-child(9n) { border-right: none; } /* Edge fix */
+/* Note: Row borders are tricky in CSS Grid gap, usually handled by specific classes in JS 
+   or by creating 9 sub-grids. For simplicity, we stick to gap, but we can add
+   classes like 'border-bottom-thick' via JS for rows 3 and 6. */
+
+.cell.selected { background-color: var(--highlight-color); }
+.cell.error { background-color: var(--error-color); color: white; }
+.cell.fixed { font-weight: bold; color: black; } /* Pre-filled numbers */
+.cell.user-input { color: var(--primary-color); } /* User numbers */
+
+/* --- CONTROLS --- */
+.actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.primary { background-color: var(--primary-color); color: white; }
+.secondary { background-color: #e9ecef; color: var(--text-main); }
+
+/* --- NUMPAD --- */
+.numpad {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    width: 100%;
+}
+
+.num-btn {
+    padding: 15px 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.num-btn:active { background-color: var(--highlight-color); }
+.eraser { color: var(--error-color); }
+
+/* --- MODAL --- */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex; justify-content: center; align-items: center;
+}
+.hidden { display: none; }
+.modal-content {
+    background: white; padding: 25px; border-radius: 12px;
+    width: 80%; max-width: 300px; text-align: center;
+}
