@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnNewGame = document.getElementById('btn-new-game');
     const numPad = document.querySelectorAll('.num-btn');
     
+    // Feedback elements
+    const feedbackElement = document.getElementById('feedback');
+    const feedbackContent = document.getElementById('feedback-content');
+    const closeFeedbackBtn = document.getElementById('close-feedback');
+    
     // Modal elements
     const hintModal = document.getElementById('hint-modal');
     const modalText = document.getElementById('hint-text');
@@ -31,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     boardElement.addEventListener('click', (e) => {
         const cell = e.target.closest('.cell');
         if (cell) selectCell(parseInt(cell.dataset.index));
+    });
+    
+    // Close feedback when clicking the close button
+    closeFeedbackBtn.addEventListener('click', () => {
+        feedbackElement.classList.add('hidden');
     });
 
     document.addEventListener('keydown', (e) => {
@@ -161,19 +171,29 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.textContent = value;
             cell.classList.add('user-input');
             cell.classList.remove('error'); // Clear error state on new input
+            
+            // Check if board is now full after filling a cell
+            if (isBoardFull()) {
+                // Automatically check solution when board is complete
+                setTimeout(() => checkSolution(true), 500); // Small delay for better UX
+            }
         }
         
         // Re-highlight similar numbers
         selectCell(selectedCellIndex);
     }
 
-    function checkSolution() {
+    function checkSolution(autoCheck = false) {
         let isCorrect = true;
+        let emptyCells = 0;
         const cells = document.querySelectorAll('.cell');
         
         for (let r = 0; r < 9; r++) {
             for (let c = 0; c < 9; c++) {
                 const val = currentBoard[r][c];
+                
+                if (val === 0) emptyCells++;
+                
                 const index = r * 9 + c;
                 
                 // Only check user inputs, not empty or fixed cells
@@ -186,7 +206,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        if (isCorrect) alert("So far so good!");
+        if (autoCheck && emptyCells === 0) {
+            // Board is full and was auto-checked
+            if (isCorrect) {
+                showCongratulationsModal();
+            } else {
+                showErrorsModal();
+            }
+        } else {
+            // Manual check or board not full
+            if (isCorrect) {
+                if (emptyCells === 0) {
+                    showFeedback('Congratulations! You solved the puzzle!', 'correct');
+                } else {
+                    showFeedback('All your entries are correct so far!', 'correct');
+                }
+            } else {
+                showFeedback('Some cells have incorrect numbers. Try again!', 'error');
+            }
+        }
+    }
+
+    // --- FEEDBACK FUNCTIONS ---
+    function showFeedback(message, type = '') {
+        feedbackContent.textContent = message;
+        feedbackContent.className = 'feedback-content';
+        if (type) {
+            feedbackContent.classList.add(`feedback-${type}`);
+        }
+        feedbackElement.classList.remove('hidden');
+        
+        // Auto-hide feedback after 5 seconds
+        clearTimeout(feedbackElement.timeoutId);
+        feedbackElement.timeoutId = setTimeout(() => {
+            feedbackElement.classList.add('hidden');
+        }, 5000);
+    }
+
+    // --- HELPER FUNCTIONS ---
+    function isBoardFull() {
+        return currentBoard.flat().every(cell => cell !== 0);
     }
 
     function provideHint() {
@@ -213,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         selectCell(idx);
                         fillCell(correctNum.toString());
                         
-                        showModal(`Hint: At Row ${r+1}, Column ${c+1}, the number ${correctNum} is the only one that fits locally.`);
+                        showFeedback(`Hint: At Row ${r+1}, Column ${c+1}, the number ${correctNum} is the only one that fits locally.`, 'hint');
                         foundHint = true;
                         return;
                     }
@@ -235,9 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 selectCell(randIdx);
                 fillCell(solution[r][c].toString());
-                showModal("This was a tricky one! I've revealed this cell for you.");
+                showFeedback("This was a tricky one! I've revealed this cell for you.", 'hint');
             } else {
-                showModal("The board is full!");
+                showFeedback("The board is full!", 'hint');
             }
         }
     }
@@ -265,6 +324,50 @@ document.addEventListener('DOMContentLoaded', () => {
     function showModal(msg) {
         modalText.textContent = msg;
         hintModal.classList.remove('hidden');
+    }
+
+    function showCongratulationsModal() {
+        const congratsModal = document.createElement('div');
+        congratsModal.className = 'modal';
+        congratsModal.innerHTML = `
+            <div class="modal-content">
+                <h3>🎉 Congratulations!</h3>
+                <p>You successfully solved the Sudoku puzzle!</p>
+                <div class="modal-actions">
+                    <button class="modal-btn" onclick="this.closest('.modal').classList.add('hidden')">Play Again</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(congratsModal);
+        
+        // Add event listener to close modal
+        congratsModal.addEventListener('click', (e) => {
+            if (e.target === congratsModal) {
+                congratsModal.remove();
+            }
+        });
+    }
+
+    function showErrorsModal() {
+        const errorsModal = document.createElement('div');
+        errorsModal.className = 'modal';
+        errorsModal.innerHTML = `
+            <div class="modal-content">
+                <h3>❌ Almost There!</h3>
+                <p>Some numbers are incorrect. The errors have been highlighted in red.</p>
+                <div class="modal-actions">
+                    <button class="modal-btn" onclick="this.closest('.modal').remove()">Continue Solving</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(errorsModal);
+        
+        // Add event listener to close modal
+        errorsModal.addEventListener('click', (e) => {
+            if (e.target === errorsModal) {
+                errorsModal.remove();
+            }
+        });
     }
 
     function moveSelection(key) {

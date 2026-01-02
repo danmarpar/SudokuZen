@@ -132,6 +132,68 @@ h1 {
 .primary { background-color: var(--primary-color); color: white; }
 .secondary { background-color: #e9ecef; color: var(--text-main); }
 
+/* Feedback section */
+.feedback {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px 40px 15px 15px;
+    margin-top: 10px;
+    position: relative;
+    transition: all 0.3s ease;
+    opacity: 1;
+    max-height: 1000px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.feedback.hidden {
+    opacity: 0;
+    max-height: 0;
+    padding: 0 15px;
+    margin: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.feedback-content {
+    color: #212529;
+    line-height: 1.5;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.close-feedback {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    padding: 0 8px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.close-feedback:hover {
+    color: #212529;
+}
+
+/* Feedback message types */
+.feedback-correct {
+    color: #28a745;
+}
+
+.feedback-hint {
+    color: #17a2b8;
+}
+
+.feedback-error {
+    color: #dc3545;
+}
+
 /* --- NUMPAD --- */
 .numpad {
     margin-top: 20px;
