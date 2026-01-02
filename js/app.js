@@ -10,43 +10,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const diffSelect = document.getElementById('diff-select');
     const btnCheck = document.getElementById('btn-check');
     const btnHint = document.getElementById('btn-hint');
+    const btnNewGame = document.getElementById('btn-new-game');
     const numPad = document.querySelectorAll('.num-btn');
-    const modal = document.getElementById('hint-modal');
+    
+    // Modal elements
+    const hintModal = document.getElementById('hint-modal');
     const modalText = document.getElementById('hint-text');
-    const closeModal = document.getElementById('close-modal');
+    const closeHintModal = document.getElementById('close-hint');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmNewBtn = document.getElementById('confirm-new');
+    const cancelNewBtn = document.getElementById('cancel-new');
 
     // --- INITIALIZATION ---
     initGame();
 
     // --- EVENT LISTENERS ---
-    diffSelect.addEventListener('change', () => initGame());
+    // Remove the change listener that was regenerating the game on difficulty change
+    // We'll only regenerate when New Game is clicked
     
-    btnCheck.addEventListener('click', checkSolution);
-    
-    btnHint.addEventListener('click', provideHint);
-    
-    closeModal.addEventListener('click', () => modal.classList.add('hidden'));
-
-    // Handle Numpad Clicks (Mobile & Desktop mouse)
-    numPad.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const value = e.target.getAttribute('data-val');
-            fillCell(value);
-        });
+    boardElement.addEventListener('click', (e) => {
+        const cell = e.target.closest('.cell');
+        if (cell) selectCell(parseInt(cell.dataset.index));
     });
 
-    // Handle Keyboard Input
     document.addEventListener('keydown', (e) => {
         if (!selectedCellIndex && selectedCellIndex !== 0) return;
         
         const key = e.key;
         if (key >= '1' && key <= '9') fillCell(key);
         if (key === 'Backspace' || key === 'Delete' || key === '0') fillCell('0');
-        
-        // Arrow Navigation
+        if (key === 'Escape') selectCell(null);
         if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
             moveSelection(key);
         }
+    });
+
+    numPad.forEach(btn => {
+        btn.addEventListener('click', () => fillCell(parseInt(btn.dataset.val)));
+    });
+
+    // Game control buttons
+    btnCheck.addEventListener('click', checkSolution);
+    btnHint.addEventListener('click', provideHint);
+    btnNewGame.addEventListener('click', showNewGameModal);
+    
+    // Modal controls
+    closeHintModal.addEventListener('click', () => hintModal.classList.add('hidden'));
+    confirmNewBtn.addEventListener('click', startNewGame);
+    cancelNewBtn.addEventListener('click', () => confirmModal.classList.add('hidden'));
+    
+    // Close modal when clicking outside
+    [hintModal, confirmModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
     });
 
     // --- CORE FUNCTIONS ---
@@ -55,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Generate a full valid 9x9 Sudoku solution
         solution = generateCompleteBoard();
         
-        // 2. Remove numbers based on difficulty to create the puzzle
+        // 2. Remove numbers based on current difficulty to create the puzzle
         const difficulty = diffSelect.value;
         const attempts = difficulty === 'easy' ? 30 : difficulty === 'medium' ? 45 : 55;
         
@@ -223,9 +242,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- GAME CONTROL FUNCTIONS ---
+    function showNewGameModal() {
+        confirmModal.classList.remove('hidden');
+    }
+    
+    function startNewGame() {
+        confirmModal.classList.add('hidden');
+        // Get the current difficulty before initializing
+        const currentDifficulty = diffSelect.value;
+        // Store the current scroll position to prevent jumping
+        const scrollPosition = window.scrollY;
+        // Initialize the game
+        initGame();
+        // Restore the selected difficulty
+        diffSelect.value = currentDifficulty;
+        // Restore scroll position
+        window.scrollTo(0, scrollPosition);
+    }
+    
+    // --- MODAL FUNCTIONS ---
     function showModal(msg) {
         modalText.textContent = msg;
-        modal.classList.remove('hidden');
+        hintModal.classList.remove('hidden');
     }
 
     function moveSelection(key) {
